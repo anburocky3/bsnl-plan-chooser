@@ -2,7 +2,7 @@
 
 BSNL Websites has boring UI right? I felt struggling at first. So created this with Suggestion tool built-in so it may be helpful for people who are into BSNL services.
 
-## 🎉 Live: Shortly
+## 🎉 Live: https://bsnl-plan-chooser.netlify.app ✨
 
 ## Screenshots:
 

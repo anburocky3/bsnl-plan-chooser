@@ -17,12 +17,12 @@ defineProps<VoucherPrice>()
 
 <template>
     <div
-        class="bg-white rounded flex justify-between items-center cursor-pointer shadow-lg hover:shadow-2xl mb-5"
+        class="bg-white rounded flex flex-col sm:flex-row justify-between items-center cursor-pointer shadow-lg hover:shadow-2xl mb-5"
     >
         <div
-            class="bg-indigo-200 rounded-l w-64 h-40 flex justify-center items-center flex-shrink-0"
+            class="bg-indigo-200 rounded-t sm:rounded-l w-full sm:w-64 h-40 flex justify-center items-center flex-shrink-0"
         >
-            <div class="space-y-4 flex flex-col justify-center items-center">
+            <div class="space-y-2 sm:space-y-4 flex flex-col justify-center items-center">
                 <h4 class="font-bold text-2xl">
                     <span class="font-sans">₹</span>
                     {{ denom }}
@@ -34,9 +34,11 @@ defineProps<VoucherPrice>()
                 <div v-if="!talk_value">{{ validity }} days</div>
             </div>
         </div>
-        <div class="p-5 grow flex justify-between items-center space-x-4">
+        <div
+            class="p-5 grow flex flex-col sm:flex-row sm:justify-between sm:items-center sm:space-x-4 w-full"
+        >
             <div class="space-y-4">
-                <h4 class="text-2xl font-bold text-gray-800 flex items-center space-x-2">
+                <h4 class="text-xl sm:text-2xl font-bold text-gray-800 flex items-center space-x-2">
                     <span v-if="talk_value" class="font-sans">₹</span>
                     {{ name }}
                     <span
@@ -44,7 +46,7 @@ defineProps<VoucherPrice>()
                     >{{ remarks }}</span>
                 </h4>
                 <div v-if="talk_value">
-                    <table class="text-gray-600 text-xs">
+                    <table class="text-gray-600 text-xs mb-5">
                         <tr>
                             <td class="border px-8">Talk Value</td>
                             <td class="border px-8">
@@ -69,13 +71,13 @@ defineProps<VoucherPrice>()
                     </table>
                 </div>
                 <p
-                    class="text-gray-600 text-sm"
+                    class="text-gray-600 text-sm pb-5 sm:pb-0"
                     v-else
                 >{{ description ?? 'No description available.' }}</p>
             </div>
-            <div class="space-y-4 w-32 flex items-center flex-shrink-0">
+            <div class="space-y-4 w-full sm:w-32 flex items-center flex-shrink-0">
                 <button
-                    class="px-8 py-2 rounded bg-indigo-700 uppercase text-white font-semibold text-sm"
+                    class="px-8 py-2 w-full rounded bg-indigo-700 uppercase text-white font-semibold text-sm"
                 >Save</button>
             </div>
         </div>

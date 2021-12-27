@@ -2,7 +2,6 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useGlobal } from '@/stores/global';
 import PrepaidDataService from '@/services/PrepaidDataService'
-import Checkbox from '@/components/forms/Checkbox.vue';
 import PriceCard from '@/components/PriceCard.vue';
 import { VoucherPrice } from '@/types/Global';
 
@@ -32,16 +31,16 @@ const fetchPlans = async (category: string, voucherType: string, circleCode: str
 }
 
 const isService = ((plan: string) => {
-    return currentPlan.value === plan ? 'px-4 py-2 bg-indigo-400 text-white' : 'px-4 py-2 text-indigo-400'
+    return currentPlan.value === plan ? 'px-4 py-2 bg-indigo-400 text-white block w-full ' : 'px-4 py-2 text-indigo-400 block w-full '
 })
 </script>
     
 <template>
     <div
-        class="flex justify-center pt-40 min-h-screen bg-gradient-to-b from-indigo-500 to-indigo-600"
+        class="flex justify-center pt-28 sm:pt-40 min-h-screen bg-gradient-to-b from-indigo-500 to-indigo-600"
     >
-        <div class="container w-full">
-            <div class="mb-10 text-center space-x-10">
+        <div class="container">
+            <div class="mb-10 text-center space-x-0 sm:space-x-10 sm:flex sm:justify-center">
                 <button
                     :class="isService('TOPUP')"
                     @click="fetchPlans('TOPUP', 'TOPUP', '3', 'S')"
@@ -60,7 +59,9 @@ const isService = ((plan: string) => {
             </div>
             <div class="bg-gray-50 p-10 rounded mb-10">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-3xl font-black my-5 text-gray-800">Here are your plans</h3>
+                    <h3
+                        class="text-xl sm:text-3xl font-semibold sm:font-black my-5 text-gray-800"
+                    >Here are your plans</h3>
                     <label
                         class="px-4 py-2 rounded bg-sky-600 text-white font-semibold"
                     >{{ currentPlan }}</label>
@@ -95,9 +96,9 @@ const isService = ((plan: string) => {
                         </div>
                     </div>
                     <div v-else>
-                        <h1 class="text-4xl text-gray-600">
+                        <h1 class="text-xl sm:text-4xl text-gray-600">
                             <svg
-                                class="animate-spin -ml-1 mr-3 h-8 w-8 text-indigo-500 inline-block"
+                                class="animate-spin -ml-1 mr-3 h-6 w-6 sm:h-8 sm:w-8 text-indigo-500 inline-block"
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
                                 viewBox="0 0 24 24"
@@ -123,10 +124,13 @@ const isService = ((plan: string) => {
             </div>
         </div>
     </div>
-    <div class="absolute top-20 right-20">
-        <p class="text-center text-white">
-            Confused?
-            <router-link :to="{ name: 'Home' }" class="text-indigo-400">Know what you need here.</router-link>
-        </p>
+    <div class="absolute top-10 sm:top-20 right-20">
+        <div class="text-center text-white flex flex-col sm:flex-row items-center">
+            <div class="text-xl sm:text-sm">Confused?</div>
+            <router-link
+                :to="{ name: 'Home' }"
+                class="ml-2 text-indigo-400"
+            >Know what you need here.</router-link>
+        </div>
     </div>
 </template>
