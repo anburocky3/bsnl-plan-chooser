@@ -2,10 +2,10 @@
 
 interface VoucherPrice {
     denom: string,
-    description: string,
+    description?: string,
     name: string,
-    planid: string,
-    validity: string,
+    planid?: string,
+    validity?: string,
     processingcharge?: string,
     remarks?: string,
     servicetax?: string,

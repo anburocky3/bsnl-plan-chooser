@@ -17,9 +17,11 @@ export interface Circle {
   ZONE_CODE: string;
 }
 
-export interface Voucher {
+export interface VoucherTypes {
   id: number;
   name: string;
+  color: string;
+  icon: string;
 }
 
 export interface VoucherPrice {
@@ -28,6 +30,7 @@ export interface VoucherPrice {
   name: string;
   planid: string;
   validity: string;
+  voucherType?: string;
   processingcharge?: string;
   remarks?: string;
   servicetax?: string;

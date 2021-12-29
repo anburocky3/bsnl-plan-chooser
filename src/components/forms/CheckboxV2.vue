@@ -1,35 +1,59 @@
 <script setup lang="ts">
-withDefaults(
+
+import { computed } from 'vue';
+
+const props = withDefaults(
     defineProps<{
+        names: any[],
         text: string,
         color?: string,
-        modelValue: string[] | number[],
+        icon: string,
         value: string | number
     }>(), {
     color: 'red',
 })
 
+const checked = computed(() => props.names.includes(props.value));
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', modelValue: string | number): void
+    (e: 'update:names', updatedNames: any): void
 }>()
 
-const handleChange = (evt: Event) => {
-    emit('update:modelValue', (evt.target as HTMLInputElement).value)
+function check() {
+    let updatedNames = [...props.names];
+    if (checked.value) {
+        updatedNames.splice(updatedNames.indexOf(props.value), 1);
+    } else {
+        updatedNames.push(props.value);
+    }
+    emit('update:names', updatedNames)
 }
+
 </script>
 
 <template>
     <label class="option_item">
-        <input type="checkbox" class="checkbox hidden" :value="value" @change="handleChange" />
+        <input type="checkbox" class="checkbox hidden" @input="check" :checked="checked" />
         <div
             class="option_inner relative bg-white rounded-md text-center h-32 border-4 border-transparent cursor-pointer hover:shadow-2xl"
         >
             <div class="tickmark"></div>
 
             <div class="h-full flex flex-col justify-center items-center space-y-3">
-                <slot></slot>
-
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-slate-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        :d="icon"
+                    />
+                </svg>
                 <h4 class="font-medium">{{ text }}</h4>
             </div>
         </div>
@@ -37,7 +61,8 @@ const handleChange = (evt: Event) => {
 </template>
 
 <style scoped>
-.option_item .checkbox:checked ~ .option_inner {
+.option_item .checkbox:checked ~ .option_inner,
+svg {
     border-color: v-bind(color);
     color: v-bind(color);
 }

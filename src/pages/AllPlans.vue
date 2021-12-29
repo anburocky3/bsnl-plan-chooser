@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';
-import { useGlobal } from '@/stores/global';
+import { useGlobal } from '@/stores/global.store';
 import PrepaidDataService from '@/services/PrepaidDataService'
 import PriceCard from '@/components/PriceCard.vue';
-import { VoucherPrice } from '@/types/Global';
+import { VoucherPrice } from '@/types/Global.types';
 
 const globalStore = useGlobal()
 const response = ref<VoucherPrice[]>()
