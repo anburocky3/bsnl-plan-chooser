@@ -1,25 +1,58 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
 import { useGlobal } from '@/stores/global.store';
-import CheckboxV2 from '@/components/forms/CheckboxV2.vue';
+import Checkbox from '@/components/forms/Checkbox.vue';
+import { useRouter } from 'vue-router';
 
 const globalStore = useGlobal()
+const router = useRouter()
 
 const form = reactive({
-    circle: '',
-    taste: [],
+    circle: 'TN',
+    taste: [] as any[],
+    errors: [] as any
 })
 
 const wizard = reactive({
     step: 1,
-    totalSteps: 3,
+    totalSteps: 2,
     nextStep() {
-        this.step++
+        if (this.checkValidations()) {
+            this.step++
+        }
     },
     previousStep() {
         this.step--
+    },
+    checkValidations(): boolean {
+        form.errors = [] // resetting form errors
+        if (this.step === 1) {
+
+            if (form.circle === '') {
+                form.errors[0] = "Please select your circle."
+                return false
+            }
+        }
+        else if (this.step === 2) {
+
+            if (!form.taste.length) {
+                form.errors[1] = "Please select your taste."
+                return false
+            }
+        }
+        return true
     }
 })
+
+const submitPreference = () => {
+    router.push({
+        name: 'AllPlansList',
+        query: {
+            circle: form.circle,
+            taste: form.taste
+        }
+    })
+}
 
 </script>
     
@@ -27,52 +60,40 @@ const wizard = reactive({
     <div
         class="flex justify-center items-center min-h-screen bg-gradient-to-b from-indigo-500 to-indigo-600"
     >
-        <div class="space-y-10 bg-indigo-400/75 rounded-lg p-10">
+        <div class="space-y-10 bg-indigo-400/75 rounded-lg p-10 m-5">
             <section v-if="wizard.step === 1" class="space-y-5">
                 <div class="max-w-3xl text-center space-y-2">
                     <h4 class="text-3xl font-black">Choose your state</h4>
                     <p>We know you are from India country, but where do you live inside india?.</p>
                 </div>
-                <select class="px-4 py-2 rounded w-full" v-model="form.circle">
-                    <option value>-Select State-</option>
-                    <option
-                        :value="circle.CIRCLE_ID"
-                        v-for="circle in globalStore.circles"
-                        :key="circle.CIRCLE_ID"
-                    >{{ circle.CIRCLE_NAME }}</option>
-                </select>
+                <div class="space-y-1">
+                    <div class="text-red-800" v-if="form.errors[0]">{{ form.errors[0] }}</div>
+                    <div class="text-orange-900 mb-2">
+                        Currently you are limited to
+                        <span>"Tamil Nadu"</span> circle.
+                    </div>
+                    <select
+                        class="px-4 py-2 rounded w-full"
+                        v-model="form.circle"
+                        @change="wizard.checkValidations"
+                        disabled
+                    >
+                        <option value>-Select State-</option>
+                        <option
+                            :value="circle.CIRCLE_CODE"
+                            v-for="circle in globalStore.circles"
+                            :key="circle.CIRCLE_CODE"
+                        >{{ circle.CIRCLE_NAME }}</option>
+                    </select>
+                </div>
             </section>
             <section v-if="wizard.step === 2" class="space-y-10">
                 <div class="max-w-3xl text-center space-y-2">
                     <h4 class="text-3xl font-black">Just, Choose Your Primary Usage</h4>
                     <p>Just choose your primary usage and we will suggest the plan accordingly. Do note that, all plans are from official BSNL website.</p>
                 </div>
-                <div class="grid grid-cols-3 gap-4">
-                    <!-- <Checkbox
-                        v-for="voucher in globalStore.getAllVouchers"
-                        :key="voucher.id"
-                        :text="voucher.name"
-                        :color="`hsla(${~~(360 * Math.random())},70%,20%,1)`"
-                        v-model="form.taste"
-                        :value="voucher.name"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-6 w-6"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                            />
-                        </svg>
-                    </Checkbox>-->
-
-                    <CheckboxV2
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <Checkbox
                         v-for="voucher in globalStore.getAllVouchers"
                         :key="voucher.id"
                         :text="voucher.name"
@@ -80,7 +101,8 @@ const wizard = reactive({
                         :icon="voucher.icon"
                         v-model:names="form.taste"
                         :value="voucher.name"
-                    ></CheckboxV2>
+                    />
+                    <div class="text-red-800" v-if="form.errors[1]">{{ form.errors[1] }}</div>
                 </div>
             </section>
             <section v-if="wizard.step === 3">
@@ -106,14 +128,14 @@ const wizard = reactive({
                     >Next</button>
                     <button
                         class="px-4 py-2 bg-orange-400 hover:bg-orange-600 rounded font-bold uppercase tracking-wider shadow-lg"
-                        @click="alert('sd')"
+                        @click="submitPreference"
                         v-if="wizard.step === wizard.totalSteps"
                     >Find my plan</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="absolute bottom-20 right-20">
+    <div class="absolute bottom-10 right-20">
         <p class="text-center text-white">
             Don't have time?
             <router-link :to="{ name: 'Plans' }" class="text-indigo-400">View all packages here</router-link>

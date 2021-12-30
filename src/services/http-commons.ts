@@ -1,9 +1,11 @@
 import { useGlobal } from "@/stores/global.store";
 import axios, { AxiosInstance } from "axios";
 
+const proxyService = "https://cors-anywhere.herokuapp.com/"; //https://cors.bridged.cc/
+const bsnlService = "https://portal2.bsnl.in/myportal/";
+
 const apiClient: AxiosInstance = axios.create({
-  baseURL:
-    "https://cors-anywhere.herokuapp.com/https://portal2.bsnl.in/myportal/",
+  baseURL: proxyService + bsnlService,
   headers: {
     "Content-type": "application/json",
   },
@@ -18,6 +20,18 @@ apiClient.interceptors.response.use(
   },
   function (error) {
     console.log(error);
+
+    if (error.response.status === 403) {
+      const globalStore = useGlobal();
+
+      globalStore.modal.state = true;
+      globalStore.modal.title = "Action needed";
+      globalStore.modal.description =
+        "Since, we are using cors-anywhere service to bypass cors verification. Give yourself access to this. Go to this link and click 'https://cors-anywhere.herokuapp.com/https://portal2.bsnl.in/myportal/prepaiddata.do'";
+      // const errMsg = "Too Many request: Please try again after few minutes.";
+      // console.log(errMsg, error.response.status);
+      // alert(errMsg);
+    }
 
     if (error.response.status === 429) {
       const globalStore = useGlobal();

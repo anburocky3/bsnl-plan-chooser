@@ -2,21 +2,40 @@
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useGlobal } from '@/stores/global.store';
 import PriceCard from '@/components/PriceCard.vue';
+import { useRoute } from 'vue-router';
 
 const globalStore = useGlobal()
-const response = ref<any>([])
+
+const route = useRoute();
+
+let userCircle: string = ''
+let userTaste: string[]
+
+if (route.query.taste) {
+    userCircle = route.query.circle as string;
+    userTaste = (route.query.taste as string[]).map((taste) => taste.toUpperCase());
+} else {
+    userCircle = '3';
+    userTaste = ['VOICE', 'DATA'];
+}
+
+
+
 const isLoaded = ref<boolean>(false)
 let allPackages = reactive<any>([])
 
 const filters = reactive({
-    circle: '',
-    voucherType: 'Topup',
+    circle: userCircle,
+    voucherType: userTaste ?? ['TOPUP'],
     cost: ''
 })
 
-const filteredResults = computed(() => {
+// const filteredResults = computed(() => {
+//     return globalStore.filteredPlans(filters.voucherType, filters.cost)
+// })
 
-    return globalStore.filteredPlans(filters.voucherType, filters.cost)
+const filteredResults = computed(() => {
+    return globalStore.filteredPlansByTaste(filters.voucherType, filters.cost)
 })
 
 document.title = 'BSNL All Plans - Masterview'
@@ -33,8 +52,8 @@ isLoaded.value = true
         <div class="container mx-auto">
             <div class="bg-gray-50 px-10 py-5 rounded mb-10 mx-2">
                 <div class="flex justify-between items-center">
-                    <div class="flex flex-col sm:flex justify-between items-center w-full">
-                        <h3 class="text-xl font-semibold sm:font-semibold my-5 text-gray-800">
+                    <div class="flex flex-col sm:flex-row justify-between items-center w-full">
+                        <h3 class="text-xl font-semibold my-5 text-gray-800 w-full">
                             <router-link :to="{ name: 'Home' }">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -52,33 +71,46 @@ isLoaded.value = true
                                 </svg>
                             </router-link>Here are your
                             <span
-                                :class="{ 'text-indigo-500 mr-2': allPackages.length > 0 }"
+                                :class="{ 'text-indigo-500 mr-2': filteredResults.length > 0 }"
                             >plans</span>
                             <span
-                                v-if="allPackages.length > 0"
+                                v-if="filteredResults.length > 0"
                                 class="sm:font-bold"
-                            >(Total: {{ allPackages.length }})</span>
+                            >(Total: {{ filteredResults.length }})</span>
+                            <span
+                                v-for="taste in filters.voucherType"
+                                :key="taste"
+                                v-text="taste"
+                                class="ml-4 px-2 bg-green-300 rounded text-sm"
+                            ></span>
                         </h3>
                         <div
-                            class="flex flex-col sm:flex items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full"
+                            class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4"
                         >
-                            <select class="px-4 py-2 rounded w-full" v-model="filters.circle">
+                            <!-- <select class="px-4 py-2 rounded w-full" v-model="filters.circle">
                                 <option value>-Circle-</option>
                                 <option
                                     :value="circle.CIRCLE_ID"
                                     v-for="circle in globalStore.circles"
                                     :key="circle.CIRCLE_ID"
                                 >{{ circle.CIRCLE_NAME }}</option>
-                            </select>
-                            <select class="px-4 py-2 rounded w-full" v-model="filters.voucherType">
+                            </select>-->
+                            <select
+                                class="px-4 py-2 rounded w-96 outline-none border-2 border-indigo-500"
+                                v-model="filters.voucherType"
+                                multiple
+                            >
                                 <option value>-VoucherType-</option>
                                 <option
-                                    :value="voucherType.name"
+                                    :value="voucherType.name.toUpperCase()"
                                     v-for="voucherType in globalStore.voucherTypes"
                                     :key="voucherType.id"
                                 >{{ voucherType.name }}</option>
                             </select>
-                            <select class="px-4 py-2 rounded w-full" v-model="filters.cost">
+                            <select
+                                class="px-4 py-2 rounded w-full outline-none border-2 border-indigo-500"
+                                v-model="filters.cost"
+                            >
                                 <option value>-Sort-</option>
                                 <option
                                     :value="sortFilter.name"
