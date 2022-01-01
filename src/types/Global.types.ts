@@ -19,6 +19,7 @@ export interface Circle {
 
 export interface VoucherTypes {
   id: number;
+  category: string;
   name: string;
   color: string;
   icon: string;

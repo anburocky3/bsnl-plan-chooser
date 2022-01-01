@@ -1,15 +1,27 @@
 import { useGlobal } from "@/stores/global.store";
 import axios, { AxiosInstance } from "axios";
+import NProgress from "nprogress";
 
-const proxyService = "https://cors-anywhere.herokuapp.com/"; //https://cors.bridged.cc/
+const proxyService = "https://cors.bridged.cc/"; //https://cors-anywhere.herokuapp.com/
 const bsnlService = "https://portal2.bsnl.in/myportal/";
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: proxyService + bsnlService,
   headers: {
     "Content-type": "application/json",
+    "x-cors-grida-api-key": import.meta.env.VITE_GRIDA_KEY,
   },
-  timeout: 5000,
+  // timeout: 5000,
+});
+
+apiClient.interceptors.request.use((config) => {
+  NProgress.start();
+  return config;
+});
+
+apiClient.interceptors.response.use((config) => {
+  NProgress.done();
+  return config;
 });
 
 // Interceptors to handle 429 - (Many too Request)

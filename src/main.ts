@@ -4,6 +4,7 @@ import "./assets/css/index.css";
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import router from "./routers";
+import "nprogress/nprogress.css";
 
 const app = createApp(App);
 

@@ -5,7 +5,8 @@ import TheModal from './components/modals/TheModal.vue';
 const globalStore = useGlobal()
 
 // checking localStorage exist, if not fetch.
-globalStore.getInitialAllDatas()
+// globalStore.getInitialAllDatas()
+
 
 </script>
 

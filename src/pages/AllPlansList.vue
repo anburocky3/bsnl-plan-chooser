@@ -1,38 +1,108 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useGlobal } from '@/stores/global.store';
+import { useLoadingState } from '@/stores/loading.store';
 import PriceCard from '@/components/PriceCard.vue';
 import { useRoute } from 'vue-router';
+import PrepaidDataService from '@/services/PrepaidDataService';
 
 const globalStore = useGlobal()
+const loadingStore = useLoadingState()
+
+globalStore.getCircles()
 
 const route = useRoute();
 
-let userCircle: string = ''
+let userCircleId: string = ''
+let userCircleCode: string = ''
+let zoneCode: string = ''
 let userTaste: string[]
+let serviceCategory = "TOPUP"
+
+let selected = ref([])
+
+let finalArr: any = []
+
+const fetchVouchersByTastes = async (userTaste: string[], userCircle: string, zoneCode: string) => {
+
+    for (const taste of userTaste) {
+        serviceCategory = globalStore.voucherTypes.find(voucherType => voucherType.name.toUpperCase() === taste)?.category!
+        const { data: { data } } = await PrepaidDataService.getPlans(serviceCategory, taste, userCircle, zoneCode)
+        const modifiedArr = data.map((plans: object) => ({
+            ...plans,
+            voucherType: taste,
+        }))
+        finalArr.push(modifiedArr)
+    }
+
+    return finalArr
+}
 
 if (route.query.taste) {
-    userCircle = route.query.circle as string;
-    userTaste = (route.query.taste as string[]).map((taste) => taste.toUpperCase());
+
+    console.log(route.query.taste);
+
+
+    loadingStore.setLoading(true)
+    userCircleId = route.query.circleId as string;
+    userCircleCode = route.query.circleCode as string;
+    zoneCode = route.query.zoneCode as string;
+
+    if (typeof route.query.taste === 'string') {
+        userTaste = Array(route.query.taste.toUpperCase())
+    } else {
+        userTaste = (route.query.taste as string[]).map((taste) => taste.toUpperCase());
+    }
+
+    fetchVouchersByTastes(userTaste, userCircleId, zoneCode).then((voucherData) => {
+        globalStore.setPlans(voucherData.flat())
+        loadingStore.setLoading(false)
+    })
+
 } else {
-    userCircle = '3';
+    userCircleId = '3';
+    userCircleCode = 'TN';
+    zoneCode = 'S';
     userTaste = ['VOICE', 'DATA'];
+
+    fetchVouchersByTastes(userTaste, userCircleId, zoneCode).then((voucherData) => {
+        globalStore.setPlans(voucherData.flat())
+    })
 }
 
 
-
-const isLoaded = ref<boolean>(false)
-let allPackages = reactive<any>([])
-
 const filters = reactive({
-    circle: userCircle,
+    circle: userCircleCode,
     voucherType: userTaste ?? ['TOPUP'],
     cost: ''
 })
 
-// const filteredResults = computed(() => {
-//     return globalStore.filteredPlans(filters.voucherType, filters.cost)
-// })
+const handleCircleChange = (e: any) => {
+    loadingStore.setLoading(true)
+    // fetch new vouchers based on this circle
+    const newCircleCode = e.target.value;
+    const newCircleId = computed(() => globalStore.circles!.find(circle => circle.CIRCLE_CODE === newCircleCode)?.CIRCLE_ID ?? '');
+
+    fetchVouchersByTastes(userTaste, String(newCircleId.value), zoneCode).then((voucherData) => {
+        globalStore.setPlans(voucherData.flat())
+        loadingStore.setLoading(false)
+    })
+}
+
+const handleVoucherTypeChange = (e: any) => {
+
+    loadingStore.setLoading(true)
+    // // fetch new vouchers based on this circle
+    // const newCircleCode = e.target.value;
+    // const newCircleId = computed(() => globalStore.circles!.find(circle => circle.CIRCLE_CODE === newCircleCode)?.CIRCLE_ID ?? '');
+    const userTaste = selected.value;
+
+    fetchVouchersByTastes(userTaste, userCircleId, zoneCode).then((voucherData) => {
+        globalStore.setPlans(voucherData.flat())
+        loadingStore.setLoading(false)
+    })
+}
+
 
 const filteredResults = computed(() => {
     return globalStore.filteredPlansByTaste(filters.voucherType, filters.cost)
@@ -40,7 +110,6 @@ const filteredResults = computed(() => {
 
 document.title = 'BSNL All Plans - Masterview'
 
-isLoaded.value = true
 
 
 </script>
@@ -75,7 +144,7 @@ isLoaded.value = true
                             >plans</span>
                             <span
                                 v-if="filteredResults.length > 0"
-                                class="sm:font-bold"
+                                class="block pl-10 text-gray-800 sm:pl-0 sm:flex sm:font-bold"
                             >(Total: {{ filteredResults.length }})</span>
                             <span
                                 v-for="taste in filters.voucherType"
@@ -85,20 +154,25 @@ isLoaded.value = true
                             ></span>
                         </h3>
                         <div
-                            class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4"
+                            class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto"
                         >
-                            <!-- <select class="px-4 py-2 rounded w-full" v-model="filters.circle">
+                            <!-- <select
+                                class="px-4 py-2 rounded w-full"
+                                v-model="filters.circle"
+                                @change="handleCircleChange"
+                            >
                                 <option value>-Circle-</option>
                                 <option
-                                    :value="circle.CIRCLE_ID"
+                                    :value="circle.CIRCLE_CODE"
                                     v-for="circle in globalStore.circles"
-                                    :key="circle.CIRCLE_ID"
+                                    :key="circle.CIRCLE_CODE"
                                 >{{ circle.CIRCLE_NAME }}</option>
-                            </select>-->
+                            </select>
                             <select
                                 class="px-4 py-2 rounded w-96 outline-none border-2 border-indigo-500"
-                                v-model="filters.voucherType"
+                                v-model="filters.circle"
                                 multiple
+                                @change="handleVoucherTypeChange"
                             >
                                 <option value>-VoucherType-</option>
                                 <option
@@ -106,7 +180,7 @@ isLoaded.value = true
                                     v-for="voucherType in globalStore.voucherTypes"
                                     :key="voucherType.id"
                                 >{{ voucherType.name }}</option>
-                            </select>
+                            </select>-->
                             <select
                                 class="px-4 py-2 rounded w-full outline-none border-2 border-indigo-500"
                                 v-model="filters.cost"
@@ -122,8 +196,8 @@ isLoaded.value = true
                     </div>
                 </div>
                 <div class="flex justify-center items-center py-5">
-                    <div v-if="isLoaded" class="w-full">
-                        <div v-if="filteredResults.length > 0">
+                    <div v-if="!loadingStore.loading" class="w-full">
+                        <div v-if="!loadingStore.loading && filteredResults.length > 0">
                             <PriceCard
                                 v-for="voucher in filteredResults"
                                 :name="voucher.name"
