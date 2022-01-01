@@ -6,6 +6,7 @@ const globalStore = useGlobal()
 
 // checking localStorage exist, if not fetch.
 // globalStore.getInitialAllDatas()
+globalStore.getCircles()
 
 
 </script>

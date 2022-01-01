@@ -7,8 +7,6 @@ import { useRouter } from 'vue-router';
 const globalStore = useGlobal()
 const router = useRouter()
 
-globalStore.getCircles()
-
 const form: any = reactive({
     circle: '',
     circleCode: computed(() => globalStore.circles!.find(circle => circle.CIRCLE_CODE === form.circle)?.CIRCLE_ID ?? ''),
@@ -38,26 +36,28 @@ const wizard = reactive({
             }
         }
         else if (this.step === 2) {
-
             if (!form.taste.length) {
                 form.errors[1] = "Please select your taste."
                 return false
             }
         }
+
         return true
     }
 })
 
 const submitPreference = () => {
-    router.push({
-        name: 'AllPlansList',
-        query: {
-            circleId: form.circleCode,
-            circleCode: form.circle,
-            zoneCode: form.zoneCode,
-            taste: form.taste
-        }
-    })
+    if (wizard.checkValidations()) {
+        router.push({
+            name: 'AllPlansList',
+            query: {
+                circleId: form.circleCode,
+                circleCode: form.circle,
+                zoneCode: form.zoneCode,
+                taste: form.taste
+            }
+        })
+    }
 }
 
 </script>
@@ -67,7 +67,7 @@ const submitPreference = () => {
         class="flex justify-center items-center min-h-screen bg-gradient-to-b from-indigo-500 to-indigo-600"
     >
         <div>
-            <div class="flex justify-center mb-10">
+            <div class="flex justify-center my-10">
                 <img
                     src="https://upload.wikimedia.org/wikipedia/en/9/97/BSNL_Logo.svg"
                     alt="BSNL Logo"
